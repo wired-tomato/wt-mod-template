@@ -46,7 +46,7 @@ subprojects {
     apply(plugin = "maven-publish")
 
     group = rootProject.property("group").toString()
-    base.archivesName = mod_id
+    base.archivesName = "$mod_id-${path.replace(":", "-")}"
     version = mod_version
 
     java {

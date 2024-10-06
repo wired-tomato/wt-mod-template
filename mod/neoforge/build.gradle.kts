@@ -10,6 +10,8 @@ val neoforge_version: String by rootProject.properties
 val kff_version: String by rootProject.properties
 val mod_id: String by rootProject.properties
 
+val common = project(":common")
+
 repositories {
     maven("https://thedarkcolour.github.io/KotlinForForge") {
         name = "Kotlin for Forge"
@@ -18,17 +20,17 @@ repositories {
 
 dependencies {
     implementation("thedarkcolour:kotlinforforge-neoforge:$kff_version")
-    compileOnly(project(":mod-common"))
+    compileOnly(common)
 }
 
 
-val generatedResources = project(":mod-common").file("src/main/generated/resources")
-val existingResources: File = project(":mod-common").file("src/main/resources")
+val generatedResources = common.file("src/main/generated/resources")
+val existingResources: File = common.file("src/main/resources")
 
 neoForge {
     version = neoforge_version
 
-    val at = project(":mod-common").file("src/main/resources/META-INF/accesstransformer.cfg")
+    val at = common.file("src/main/resources/META-INF/accesstransformer.cfg")
     if (at.exists()) {
         accessTransformers.add(at.absolutePath)
     }
@@ -82,25 +84,25 @@ val findTask by tasks.creating {
 }
 
 tasks.compileJava {
-    val commonJava = project(":mod-common").tasks.compileJava.get()
+    val commonJava = common.tasks.compileJava.get()
     dependsOn(commonJava)
     source(commonJava.source)
 }
 
 tasks.compileKotlin {
-    val commonKotlin = project(":mod-common").tasks.compileKotlin.get()
+    val commonKotlin = common.tasks.compileKotlin.get()
     dependsOn(commonKotlin)
     source(commonKotlin.sources)
 }
 
 tasks.processResources {
-    val commonResources = project(":mod-common").tasks.processResources.get()
+    val commonResources = common.tasks.processResources.get()
     dependsOn(commonResources)
     from(commonResources)
 }
 
 tasks.sourcesJar {
-    val commonSources = project(":mod-common").tasks.getByName<Jar>("sourcesJar")
+    val commonSources = common.tasks.getByName<Jar>("sourcesJar")
     dependsOn(commonSources)
     from(commonSources.archiveFile.map { zipTree(it) })
 }

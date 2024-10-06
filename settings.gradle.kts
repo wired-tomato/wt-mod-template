@@ -37,10 +37,10 @@ include("deplatformed-api", "deplatformed-ksp")
 project(":deplatformed-api").projectDir = file("deplatformed/api")
 project(":deplatformed-ksp").projectDir = file("deplatformed/ksp")
 
-include("mod-common", "mod-fabric", "mod-neoforge")
-project(":mod-common").projectDir = file("mod/common")
-project(":mod-fabric").projectDir = file("mod/fabric")
-project(":mod-neoforge").projectDir = file("mod/neoforge")
+include("common", "fabric", "neoforge")
+project(":common").projectDir = file("mod/common")
+project(":fabric").projectDir = file("mod/fabric")
+project(":neoforge").projectDir = file("mod/neoforge")
 
 rootProject.name = "wt-mod-template"
 

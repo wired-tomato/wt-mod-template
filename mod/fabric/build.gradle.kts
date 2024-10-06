@@ -17,6 +17,8 @@ val mod_author: String by rootProject.properties
 val license: String by rootProject.properties
 val java_version: String by rootProject.properties
 
+val common = project(":common")
+
 dependencies {
     minecraft("com.mojang:minecraft:$minecraft_version")
     mappings(loom.layered {
@@ -28,11 +30,11 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
     modImplementation("net.fabricmc:fabric-language-kotlin:$flk_version")
 
-    compileOnly(project(":mod-common"))
+    compileOnly(common)
 }
 
 loom {
-    val aw = project(":mod-common").file("src/main/resources/$mod_id.accesswidener")
+    val aw = common.file("src/main/resources/$mod_id.accesswidener")
     if (aw.exists()) {
         accessWidenerPath.set(aw)
     }
@@ -63,25 +65,25 @@ tasks.jar {
 }
 
 tasks.compileJava {
-    val commonJava = project(":mod-common").tasks.compileJava.get()
+    val commonJava = common.tasks.compileJava.get()
     dependsOn(commonJava)
     source(commonJava.source)
 }
 
 tasks.compileKotlin {
-    val commonKotlin = project(":mod-common").tasks.compileKotlin.get()
+    val commonKotlin = common.tasks.compileKotlin.get()
     dependsOn(commonKotlin)
     source(commonKotlin.sources)
 }
 
 tasks.processResources {
-    val commonResources = project(":mod-common").tasks.processResources.get()
+    val commonResources = common.tasks.processResources.get()
     dependsOn(commonResources)
     from(commonResources)
 }
 
 tasks.sourcesJar {
-    val commonSources = project(":mod-common").tasks.getByName<Jar>("sourcesJar")
+    val commonSources = common.tasks.getByName<Jar>("sourcesJar")
     dependsOn(commonSources)
     from(commonSources.archiveFile.map { zipTree(it) })
 }
