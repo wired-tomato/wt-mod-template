@@ -32,7 +32,7 @@ neoForge {
 
     val at = common.file("src/main/resources/META-INF/accesstransformer.cfg")
     if (at.exists()) {
-        accessTransformers.add(at.absolutePath)
+        accessTransformers.from(at.absolutePath)
     }
 
     parchment {

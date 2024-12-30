@@ -7,4 +7,4 @@ interface PlatformService {
     fun getEnvironmentName(): String = if (isDevelopmentEnvironment()) "development" else "production"
 }
 
-object PlatformServiceImpl : PlatformService by Services.getService()
+val PlatformServiceImpl = Services.getService<PlatformService>()
