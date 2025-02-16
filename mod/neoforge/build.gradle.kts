@@ -50,8 +50,15 @@ neoForge {
             client()
         }
 
-        val data by creating {
-            data()
+        val clientData by creating {
+            clientData()
+            programArguments.addAll("--all", "--mod", rootProject.property("mod_id").toString())
+            programArguments.addAll("--output", generatedResources.absolutePath)
+            programArguments.addAll("--existing", existingResources.absolutePath)
+        }
+
+        val serverData by creating {
+            serverData()
             programArguments.addAll("--all", "--mod", rootProject.property("mod_id").toString())
             programArguments.addAll("--output", generatedResources.absolutePath)
             programArguments.addAll("--existing", existingResources.absolutePath)
@@ -72,14 +79,6 @@ neoForge {
 sourceSets.main {
     resources {
         srcDir("src/generated/resources")
-    }
-}
-
-val findTask by tasks.creating {
-    doLast {
-        tasks.forEach { task ->
-            println(task.name + "${task.outputs.files.files}")
-        }
     }
 }
 

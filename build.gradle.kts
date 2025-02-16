@@ -2,11 +2,11 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.1.0"
-    kotlin("plugin.serialization") version "2.1.0"
-    id("com.google.devtools.ksp") version "2.1.0-1.0.29" apply false
+    kotlin("jvm") version "2.1.10"
+    kotlin("plugin.serialization") version "2.1.10"
+    id("com.google.devtools.ksp") version "2.1.10-1.0.30" apply false
     id("fabric-loom") version "1.9-SNAPSHOT" apply false
-    id("net.neoforged.moddev") version "2.0.66-beta" apply false
+    id("net.neoforged.moddev") version "2.0.78" apply false
     id("com.github.johnrengelman.shadow") version "8.1.1" apply false
     `maven-publish`
 }
@@ -55,8 +55,9 @@ subprojects {
 
     repositories {
         mavenCentral()
-        maven("https://maven.wiredtomato.net/snapshots")
-        maven("https://maven.parchmentmc.org")
+        maven("https://maven.parchmentmc.org") {
+            name = "ParchmentMC"
+        }
     }
 
     dependencies {
