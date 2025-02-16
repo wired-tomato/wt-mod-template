@@ -53,14 +53,14 @@ neoForge {
         val clientData by creating {
             clientData()
             programArguments.addAll("--all", "--mod", rootProject.property("mod_id").toString())
-            programArguments.addAll("--output", generatedResources.absolutePath)
+            programArguments.addAll("--output", generatedResources.resolve("client").absolutePath)
             programArguments.addAll("--existing", existingResources.absolutePath)
         }
 
         val serverData by creating {
             serverData()
             programArguments.addAll("--all", "--mod", rootProject.property("mod_id").toString())
-            programArguments.addAll("--output", generatedResources.absolutePath)
+            programArguments.addAll("--output", generatedResources.resolve("server").absolutePath)
             programArguments.addAll("--existing", existingResources.absolutePath)
         }
 

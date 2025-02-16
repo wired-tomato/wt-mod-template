@@ -31,6 +31,9 @@ dependencies {
 
 sourceSets.main {
     resources {
-        srcDir("src/main/generated/resources")
+        srcDirs(
+            "src/main/generated/resources/client",
+            "src/main/generated/resources/server",
+        )
     }
 }
