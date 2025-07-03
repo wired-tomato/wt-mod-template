@@ -6,7 +6,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [],
   "client": [
-    "MixinTitleScreen"
+    "net.wiredtomato.tcatm.mixin.MixinTitleScreen"
   ],
   "server": [],
   "injectors": {

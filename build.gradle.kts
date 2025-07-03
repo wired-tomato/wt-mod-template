@@ -38,6 +38,12 @@ val credits: String by rootProject.properties
 val license: String by rootProject.properties
 val java_version: String by rootProject.properties
 
+val versions = VersionRetriever.getLatestNeoformVersion(minecraft_version)
+val latestNFVersion = VersionRetriever.getLatestNeoForgeVersion(minecraft_version)
+val latestFabricLoaderVersion = VersionRetriever.getLatestFabricLoaderVersion(minecraft_version)
+val latestFabricApiVersion = VersionRetriever.getLatestFabricApiVersion(minecraft_version)
+val latestKotlinForNeoForgeVersion = VersionRetriever.getLatestKotlinForNeoForgeVersion(minecraft_version)
+
 subprojects {
     apply(plugin = "java")
     apply(plugin = "kotlin")
