@@ -5,7 +5,8 @@ plugins {
     id("net.neoforged.moddev")
 }
 
-val neo_form_version: String by rootProject.properties
+val minecraft_version: String by rootProject.properties
+val neo_form_version = VersionRetriever.getLatestNeoformVersion(minecraft_version)
 val parchment_minecraft: String by rootProject.properties
 val parchment_version: String by rootProject.properties
 

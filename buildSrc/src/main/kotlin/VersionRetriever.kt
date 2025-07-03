@@ -19,9 +19,11 @@ import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-object VersionRetriever {
+class VersionRetriever(
+    val minecraftVersion: String,
+) {
     private var cache = VersionCache("", Clock.System.now())
-    private const val CACHE_FILE = "gradle/version_cache.json"
+    private val cacheFile = "gradle/version_caches/${minecraftVersion}.json"
     private val json = Json {
         prettyPrint = true
     }
@@ -72,18 +74,18 @@ object VersionRetriever {
         return values
     }
 
-    private fun ensureUpToDateCache(minecraftVersion: String) {
-        if (cache.minecraftVersion != minecraftVersion) {
+    private fun ensureUpToDateCache() {
+        if (cache.minecraftVersion != minecraftVersion || (Clock.System.now() - cache.lastModified).inWholeMinutes > 5) {
             updateCaches(minecraftVersion)
         }
     }
 
-    fun getLatestNeoformVersion(minecraftVersion: String): String {
-        ensureUpToDateCache(minecraftVersion)
+    fun getLatestNeoformVersion(): String {
+        ensureUpToDateCache()
         return cache.versions.find { it.first == MavenModule.NEOFORM }!!.second.version
     }
 
-    private fun fetchLatestNeoformVersion(minecraftVersion: String): String {
+    private fun fetchLatestNeoformVersion(): String {
         val versions = getVersions("maven.neoforged.net", "net.neoforged", "neoform")
 
         val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd.HHmmss")
@@ -105,11 +107,11 @@ object VersionRetriever {
     }
 
     fun getLatestNeoForgeVersion(minecraftVersion: String): String {
-        ensureUpToDateCache(minecraftVersion)
+        ensureUpToDateCache()
         return cache.versions.find { it.first == MavenModule.NEOFORGE }!!.second.version
     }
 
-    private fun fetchLatestNeoForgeVersion(minecraftVersion: String): String {
+    private fun fetchLatestNeoForgeVersion(): String {
         val versions = getVersions("maven.neoforged.net", "net.neoforged", "neoforge")
 
         val latest = versions.map { version ->
@@ -125,11 +127,11 @@ object VersionRetriever {
 
         if (latest == null) return ""
 
-        return listOf(latest.first, latest.second).joinToString("-")
+        return listOf(latest.first, latest.second).joinToString(".")
     }
 
-    fun getLatestFabricLoaderVersion(minecraftVersion: String): String {
-        ensureUpToDateCache(minecraftVersion)
+    fun getLatestFabricLoaderVersion(): String {
+        ensureUpToDateCache()
         return cache.versions.find { it.first == MavenModule.FABRIC_LOADER }!!.second.version
     }
 
@@ -137,12 +139,12 @@ object VersionRetriever {
         return getLatestVersion("maven.fabricmc.net", "net.fabricmc", "fabric-loader")
     }
 
-    fun getLatestFabricApiVersion(minecraftVersion: String): String {
-        ensureUpToDateCache(minecraftVersion)
+    fun getLatestFabricApiVersion(): String {
+        ensureUpToDateCache()
         return cache.versions.find { it.first == MavenModule.FABRIC_API }!!.second.version
     }
 
-    private fun fetchLatestFabricApiVersion(minecraftVersion: String): String {
+    private fun fetchLatestFabricApiVersion(): String {
         val versions = getVersions("maven.fabricmc.net", "net.fabricmc.fabric-api", "fabric-api")
 
         val latest = versions.mapNotNull { version ->
@@ -161,8 +163,8 @@ object VersionRetriever {
         return listOf(latest.second, latest.first).joinToString("+")
     }
 
-    fun getLatestFabricLangKotlinVersion(minecraftVersion: String): String {
-        ensureUpToDateCache(minecraftVersion)
+    fun getLatestFabricLangKotlinVersion(): String {
+        ensureUpToDateCache()
         return cache.versions.find { it.first == MavenModule.FABRIC_LANG_KOTLIN }!!.second.version
     }
 
@@ -170,12 +172,12 @@ object VersionRetriever {
         return getLatestVersion("maven.fabricmc.net", "net.fabricmc", "fabric-language-kotlin")
     }
 
-    fun getLatestKotlinForNeoForgeVersion(minecraftVersion: String): String {
-        ensureUpToDateCache(minecraftVersion)
+    fun getLatestKotlinForNeoForgeVersion(): String {
+        ensureUpToDateCache()
         return cache.versions.find { it.first == MavenModule.KOTLIN_FOR_NEOFORGE }!!.second.version
     }
 
-    private fun fetchLatestKotlinForNeoForgeVersion(minecraftVersion: String): String {
+    private fun fetchLatestKotlinForNeoForgeVersion(): String {
         val httpClient = HttpClient(CIO)
 
         val versions = runBlocking {
@@ -192,8 +194,17 @@ object VersionRetriever {
         return latest.versionNumber
     }
 
+    fun getLatestParchmentVersion(): String {
+        ensureUpToDateCache()
+        return cache.versions.find { it.first == MavenModule.forParchment(minecraftVersion) }!!.second.version
+    }
+
+    private fun fetchLatestParchmentVersion(): String {
+        return getLatestVersion("maven.parchmentmc.org", "org.parchmentmc.data", "parchment-${minecraftVersion}")
+    }
+
     private fun updateCaches(minecraftVersion: String) {
-        val cacheFile = File(CACHE_FILE)
+        val cacheFile = File(cacheFile)
         var cache = if (cacheFile.exists()) {
             val data = cacheFile.readText(Charsets.UTF_8)
             json.decodeFromString<VersionCache>(data)
@@ -224,6 +235,10 @@ object VersionRetriever {
             val FABRIC_API = MavenModule("maven.fabricmc.net", "net.fabricmc.fabric-api", "fabric-api")
             val FABRIC_LANG_KOTLIN = MavenModule("maven.fabricmc.net", "net.fabricmc", "fabric-language-kotlin")
             val KOTLIN_FOR_NEOFORGE = MavenModule("thedarkcolour.github.io/KotlinForForge", "thedarkcolour", "kotlinforforge-neoforge")
+
+            fun forParchment(minecraftVersion: String): MavenModule {
+                return MavenModule("maven.parchmentmc.org", "org.parchmentmc.data", "parchment-${minecraftVersion}")
+            }
         }
     }
 
@@ -240,16 +255,18 @@ object VersionRetriever {
     ) {
         companion object {
             fun newest(minecraftVersion: String): VersionCache {
+                val retriever = VersionRetriever(minecraftVersion)
                 val now = Clock.System.now()
                 return VersionCache(
                     minecraftVersion, now,
                     listOf(
-                        MavenModule.NEOFORM to CachedVersion(fetchLatestNeoformVersion(minecraftVersion)),
-                        MavenModule.NEOFORGE to CachedVersion(fetchLatestNeoForgeVersion(minecraftVersion)),
-                        MavenModule.FABRIC_LOADER to CachedVersion(fetchLatestFabricLoaderVersion()),
-                        MavenModule.FABRIC_API to CachedVersion(fetchLatestFabricApiVersion(minecraftVersion)),
-                        MavenModule.FABRIC_LANG_KOTLIN to CachedVersion(fetchLatestFabricLangKotlinVersion()),
-                        MavenModule.KOTLIN_FOR_NEOFORGE to CachedVersion(fetchLatestKotlinForNeoForgeVersion(minecraftVersion))
+                        MavenModule.NEOFORM to CachedVersion(retriever.fetchLatestNeoformVersion()),
+                        MavenModule.NEOFORGE to CachedVersion(retriever.fetchLatestNeoForgeVersion()),
+                        MavenModule.FABRIC_LOADER to CachedVersion(retriever.fetchLatestFabricLoaderVersion()),
+                        MavenModule.FABRIC_API to CachedVersion(retriever.fetchLatestFabricApiVersion()),
+                        MavenModule.FABRIC_LANG_KOTLIN to CachedVersion(retriever.fetchLatestFabricLangKotlinVersion()),
+                        MavenModule.KOTLIN_FOR_NEOFORGE to CachedVersion(retriever.fetchLatestKotlinForNeoForgeVersion()),
+                        MavenModule.forParchment(minecraftVersion) to CachedVersion(retriever.fetchLatestParchmentVersion())
                     )
                 )
             }

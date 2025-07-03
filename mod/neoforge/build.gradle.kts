@@ -4,10 +4,11 @@ plugins {
     id("net.neoforged.moddev")
 }
 
+val minecraft_version: String by rootProject.properties
 val parchment_minecraft: String by rootProject.properties
 val parchment_version: String by rootProject.properties
-val neoforge_version: String by rootProject.properties
-val kff_version: String by rootProject.properties
+val neoforge_version = VersionRetriever.getLatestNeoForgeVersion(minecraft_version)
+val kff_version = VersionRetriever.getLatestKotlinForNeoForgeVersion(minecraft_version)
 val mod_id: String by rootProject.properties
 
 val common = project(":common")
