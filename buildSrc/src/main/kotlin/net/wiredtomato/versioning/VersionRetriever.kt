@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter
 class VersionRetriever(
     val minecraftVersion: String,
 ) {
-    private var cache = VersionCache("", Clock.System.now())
+    private lateinit var cache: VersionCache
     private val cacheFile = "gradle/version_caches/${minecraftVersion}.json"
     private val json = Json {
         prettyPrint = true
@@ -77,6 +77,8 @@ class VersionRetriever(
     }
 
     private fun ensureUpToDateCache() {
+        if (!::cache.isInitialized) updateCaches(minecraftVersion)
+
         if (cache.minecraftVersion != minecraftVersion || (Clock.System.now() - cache.lastModified).inWholeMinutes > 5) {
             updateCaches(minecraftVersion)
         }
@@ -196,6 +198,45 @@ class VersionRetriever(
         return latest.versionNumber
     }
 
+    fun getLatestKotlinForForgeVersion(): String {
+        ensureUpToDateCache()
+        return cache.versions.find { it.first == MavenModule.KOTLIN_FOR_FORGE }!!.second.version
+    }
+
+    private fun fetchLatestKotlinForForgeVersion(): String {
+        val httpClient = HttpClient(CIO)
+
+        val versions = runBlocking {
+            json.decodeFromString<List<ModrinthVersion>>(httpClient.get("https://api.modrinth.com/v2/project/kotlin-for-forge/version") {
+                parametersOf(mapOf(
+                    "loaders" to listOf("forge"),
+                    "game_versions" to listOf(minecraftVersion)
+                ))
+            }.bodyAsText())
+        }
+
+        val latest = versions.maxBy { Version.parse(it.versionNumber) }
+
+        return latest.versionNumber
+    }
+
+    fun getLatestForgeVersion(): String {
+        ensureUpToDateCache()
+        return cache.versions.find { it.first == MavenModule.FORGE }!!.second.version
+    }
+
+    private fun fetchLatestForgeVersion(): String {
+        val versions = getVersions("maven.minecraftforge.net", "net.minecraftforge", "forge")
+
+        return versions.map {
+            val split = it.split("-")
+
+            val mcVersion = split.first()
+            val forgeVersion = Version(split.subList(1, split.size).joinToString("-"))
+            mcVersion to forgeVersion
+        }.filter { it.first == minecraftVersion }.maxBy { it.second }.second.versionString
+    }
+
     fun getLatestParchmentVersion(): String {
         ensureUpToDateCache()
         return cache.versions.find { it.first == MavenModule.forParchment(minecraftVersion) }!!.second.version
@@ -238,6 +279,8 @@ class VersionRetriever(
             val FABRIC_API = MavenModule("maven.fabricmc.net", "net.fabricmc.fabric-api", "fabric-api")
             val FABRIC_LANG_KOTLIN = MavenModule("maven.fabricmc.net", "net.fabricmc", "fabric-language-kotlin")
             val KOTLIN_FOR_NEOFORGE = MavenModule("thedarkcolour.github.io/KotlinForForge", "thedarkcolour", "kotlinforforge-neoforge")
+            val KOTLIN_FOR_FORGE = MavenModule("thedarkcolour.github.io/KotlinForForge", "thedarkcolour", "kotlinforforge")
+            val FORGE = MavenModule("maven.minecraftforge.net", "net.minecraftforge", "forge")
 
             fun forParchment(minecraftVersion: String): MavenModule {
                 return MavenModule("maven.parchmentmc.org", "org.parchmentmc.data", "parchment-${minecraftVersion}")
@@ -269,7 +312,9 @@ class VersionRetriever(
                         MavenModule.FABRIC_API to CachedVersion(retriever.fetchLatestFabricApiVersion()),
                         MavenModule.FABRIC_LANG_KOTLIN to CachedVersion(retriever.fetchLatestFabricLangKotlinVersion()),
                         MavenModule.KOTLIN_FOR_NEOFORGE to CachedVersion(retriever.fetchLatestKotlinForNeoForgeVersion()),
-                        MavenModule.forParchment(minecraftVersion) to CachedVersion(retriever.fetchLatestParchmentVersion())
+                        MavenModule.forParchment(minecraftVersion) to CachedVersion(retriever.fetchLatestParchmentVersion()),
+                        MavenModule.FORGE to CachedVersion(retriever.fetchLatestForgeVersion()),
+                        MavenModule.KOTLIN_FOR_FORGE to CachedVersion(retriever.fetchLatestKotlinForForgeVersion())
                     )
                 )
             }

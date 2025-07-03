@@ -7,10 +7,11 @@ plugins {
 val common = project(":common")
 
 val minecraft_version: String by rootProject.properties
-val forge_version: String by rootProject.properties
-val kff_version: String by rootProject.properties
-val parchment_minecraft: String by rootProject.properties
-val parchment_version: String by rootProject.properties
+val versionRetriever = CommonVersionRetrievers.getOrCreate(minecraft_version)
+val forge_version = versionRetriever.getLatestForgeVersion()
+val kff_version = versionRetriever.getLatestKotlinForForgeVersion()
+val parchment_minecraft = versionRetriever.minecraftVersion
+val parchment_version = versionRetriever.getLatestParchmentVersion()
 
 minecraft {
     mappings("official", minecraft_version)
