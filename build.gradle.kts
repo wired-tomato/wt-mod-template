@@ -16,8 +16,10 @@ repositories {
 }
 
 val minecraft_version: String by project.properties
-val parchment_minecraft: String by rootProject.properties
-val parchment_version: String by rootProject.properties
+val versionRetriever = CommonVersionRetrievers.getOrCreate(minecraft_version)
+
+val parchment_minecraft = versionRetriever.minecraftVersion
+val parchment_version = versionRetriever.getLatestParchmentVersion()
 
 val mod_id: String by rootProject.properties
 val mod_name: String by rootProject.properties
@@ -25,26 +27,18 @@ val mod_description: String by rootProject.properties
 val mod_version: String by rootProject.properties
 val mod_author: String by rootProject.properties
 
-val fabric_loader_version: String by rootProject.properties
-val fabric_version: String by rootProject.properties
-val flk_version: String by rootProject.properties
+val fabric_loader_version = versionRetriever.getLatestFabricLoaderVersion()
+val fabric_version = versionRetriever.getLatestFabricApiVersion()
+val flk_version = versionRetriever.getLatestFabricLangKotlinVersion()
 
 val minecraft_version_range: String by rootProject.properties
-val neoforge_version: String by rootProject.properties
-val kff_version: String by rootProject.properties
+val neoforge_version = versionRetriever.getLatestNeoForgeVersion()
+val kff_version = versionRetriever.getLatestKotlinForNeoForgeVersion()
 val kff_loader_version_range: String by rootProject.properties
 val credits: String by rootProject.properties
 
 val license: String by rootProject.properties
 val java_version: String by rootProject.properties
-
-val versionRetriever = CommonVersionRetrievers.getOrCreate(minecraft_version)
-
-val versions = versionRetriever.getLatestNeoformVersion()
-val latestNFVersion = versionRetriever.getLatestNeoForgeVersion()
-val latestFabricLoaderVersion = versionRetriever.getLatestFabricLoaderVersion()
-val latestFabricApiVersion = versionRetriever.getLatestFabricApiVersion()
-val latestKotlinForNeoForgeVersion = versionRetriever.getLatestKotlinForNeoForgeVersion()
 
 subprojects {
     apply(plugin = "java")
@@ -54,7 +48,7 @@ subprojects {
     apply(plugin = "maven-publish")
 
     group = rootProject.property("group").toString()
-    base.archivesName = "$mod_id-${path.replace(":", "-")}"
+    base.archivesName = "$mod_id-${path.replace(":", "")}"
     version = mod_version
 
     java {
