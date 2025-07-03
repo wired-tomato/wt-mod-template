@@ -6,8 +6,8 @@ plugins {
 
 val minecraft_version: String by project.properties
 val versionRetriever = CommonVersionRetrievers.getOrCreate(minecraft_version)
-val parchment_minecraft: String by rootProject.properties
-val parchment_version: String by rootProject.properties
+val parchment_minecraft = versionRetriever.minecraftVersion
+val parchment_version = versionRetriever.getLatestParchmentVersion()
 val fabric_loader_version = versionRetriever.getLatestFabricLoaderVersion()
 val fabric_version = versionRetriever.getLatestFabricApiVersion()
 val flk_version = versionRetriever.getLatestFabricLangKotlinVersion()

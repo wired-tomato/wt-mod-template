@@ -6,8 +6,8 @@ plugins {
 
 val minecraft_version: String by rootProject.properties
 val versionRetriever = CommonVersionRetrievers.getOrCreate(minecraft_version)
-val parchment_minecraft: String by rootProject.properties
-val parchment_version: String by rootProject.properties
+val parchment_minecraft = versionRetriever.minecraftVersion
+val parchment_version = versionRetriever.getLatestParchmentVersion()
 val neoforge_version = versionRetriever.getLatestNeoForgeVersion()
 val kff_version = versionRetriever.getLatestKotlinForNeoForgeVersion()
 val mod_id: String by rootProject.properties

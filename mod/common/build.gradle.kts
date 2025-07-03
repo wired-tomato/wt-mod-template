@@ -20,8 +20,8 @@ if (minecraftVersion >= cutoff) {
     apply(plugin = "net.neoforged.moddev")
 
     val neo_form_version = versionRetriever.getLatestNeoformVersion()
-    val parchment_minecraft: String by rootProject.properties
-    val parchment_version: String by rootProject.properties
+    val parchment_minecraft = versionRetriever.minecraftVersion
+    val parchment_version = versionRetriever.getLatestParchmentVersion()
 
     (project.extensions.getByName("neoForge") as NeoForgeExtension).apply {
         setNeoFormVersion(neo_form_version)
