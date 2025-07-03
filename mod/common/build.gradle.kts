@@ -4,6 +4,7 @@ import org.spongepowered.gradle.vanilla.MinecraftExtension
 
 val cutoff = Version("1.20.2")
 val minecraft_version: String by rootProject.properties
+val versionRetriever = CommonVersionRetrievers.getOrCreate(minecraft_version)
 val minecraftVersion = Version(minecraft_version)
 val mod_id: String by rootProject.properties
 
@@ -18,7 +19,7 @@ plugins {
 if (minecraftVersion >= cutoff) {
     apply(plugin = "net.neoforged.moddev")
 
-    val neo_form_version = VersionRetriever.getLatestNeoformVersion(minecraft_version)
+    val neo_form_version = versionRetriever.getLatestNeoformVersion()
     val parchment_minecraft: String by rootProject.properties
     val parchment_version: String by rootProject.properties
 

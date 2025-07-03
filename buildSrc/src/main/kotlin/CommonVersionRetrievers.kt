@@ -1,3 +1,5 @@
+import net.wiredtomato.versioning.VersionRetriever
+
 object CommonVersionRetrievers {
     private val retrievers = mutableMapOf<String, VersionRetriever>()
 

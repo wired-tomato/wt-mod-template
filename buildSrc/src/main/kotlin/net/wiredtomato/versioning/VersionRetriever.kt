@@ -1,3 +1,5 @@
+package net.wiredtomato.versioning
+
 import groovy.util.Node
 import groovy.util.NodeList
 import groovy.xml.XmlParser
@@ -106,7 +108,7 @@ class VersionRetriever(
         return listOf(latest.first, latest.second.format(dateTimeFormatter)).joinToString("-")
     }
 
-    fun getLatestNeoForgeVersion(minecraftVersion: String): String {
+    fun getLatestNeoForgeVersion(): String {
         ensureUpToDateCache()
         return cache.versions.find { it.first == MavenModule.NEOFORGE }!!.second.version
     }
@@ -205,6 +207,7 @@ class VersionRetriever(
 
     private fun updateCaches(minecraftVersion: String) {
         val cacheFile = File(cacheFile)
+        cacheFile.parentFile.mkdirs()
         var cache = if (cacheFile.exists()) {
             val data = cacheFile.readText(Charsets.UTF_8)
             json.decodeFromString<VersionCache>(data)

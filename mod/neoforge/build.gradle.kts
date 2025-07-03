@@ -5,10 +5,11 @@ plugins {
 }
 
 val minecraft_version: String by rootProject.properties
+val versionRetriever = CommonVersionRetrievers.getOrCreate(minecraft_version)
 val parchment_minecraft: String by rootProject.properties
 val parchment_version: String by rootProject.properties
-val neoforge_version = VersionRetriever.getLatestNeoForgeVersion(minecraft_version)
-val kff_version = VersionRetriever.getLatestKotlinForNeoForgeVersion(minecraft_version)
+val neoforge_version = versionRetriever.getLatestNeoForgeVersion()
+val kff_version = versionRetriever.getLatestKotlinForNeoForgeVersion()
 val mod_id: String by rootProject.properties
 
 val common = project(":common")
